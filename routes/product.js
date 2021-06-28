@@ -49,10 +49,9 @@ router.post('/', async (req, res) => {
 })
 
 router.put('/:id', async (req, res) => {
-  console.log('ooo');
   const id = req.params.id;
   try {
-    const target = await Product.findOne({id});
+    const target = await Product.findById(id);
     console.log(target);
     if (target) {
       target.name = req.body.name;
@@ -64,7 +63,7 @@ router.put('/:id', async (req, res) => {
         data: target
       })
     } else {
-      res.status(200).json({
+      res.status(404).json({
         status: 'failed',
         message: 'Product not found'
       })

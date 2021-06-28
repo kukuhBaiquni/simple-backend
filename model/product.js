@@ -5,6 +5,7 @@ const product = new Schema ({
     name: {
         type: String,
         minLength: 3,
+        maxlength: 5,
         required: true,
         trim: true
     },
