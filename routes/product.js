@@ -1,6 +1,19 @@
 const express = require('express')
 
 const router = express.Router()
+const multer = require('multer')
+
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, 'public/images')
+  },
+  filename(req, file, cb) {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}.png`
+    cb(null, `${file.fieldname}-${uniqueSuffix}`)
+  },
+})
+
+const upload = multer({ storage })
 const Product = require('../model/product')
 
 router.get('/:page', async (req, res) => {
@@ -24,30 +37,22 @@ router.get('/:page', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', upload.array('images'), async (req, res) => {
   const {
-    name,
-    price,
-    description,
-    unit,
-    createdAt,
+    name, price, description, unit, createdAt,
   } = req.body
+  const images = req.files.map((item, index) => ({
+    url: `http://192.168.43.24:8000/images/${item.filename}`,
+    isThumbnail: index === 0,
+  }))
   try {
     const product = new Product({
-      name,
-      price,
-      description,
-      unit,
-      createdAt,
+      name, price, description, unit, createdAt, images,
     })
     await product.save()
     res.status(200).json({
       data: {
-        name,
-        price,
-        description,
-        unit,
-        createdAt,
+        name, price, description, unit, createdAt, images,
       },
       status: 'success',
     })
